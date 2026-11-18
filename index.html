@@ -1,0 +1,18 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"><title>Zayta Cosmétique</title></head><body>
+<header><div class="wrap"><a class="logo" href="index.html">Zayta<small>Cosmétique</small></a></div></header>
+<main class="wrap">
+<section class="hero"><div><h1>Des cheveux nourris, naturellement.</h1><p>Huile et beurre capillaires 100 % naturels. Paiement à la livraison partout au Maroc.</p><a class="btn" href="#produits">Voir les produits</a></div><img src="assets/duo.jpg" alt="Huile capillaire nourrissante et beurre capillaire fouetté Zayta"></section>
+<section id="produits"><h2>Nos produits</h2><div class="grid" id="grid" aria-live="polite"><p>Chargement…</p></div></section>
+</main>
+<footer><div class="wrap">Zayta Cosmétique · Paiement à la livraison</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="app.js"></script>
+<script>
+(async()=>{
+ const g=$("#grid"); const {data,error}=await sb.from("products").select("*").eq("active",true).order("created_at");
+ g.replaceChildren();
+ if(error||!data.length){g.append(el("p",{text:error?"Impossible de charger les produits pour le moment.":"Les produits arrivent bientôt."}));return}
+ data.forEach(p=>g.append(el("a",{class:"card",href:"product.html?id="+p.id},
+  el("div",{class:"ph"},p.image_url?el("img",{src:p.image_url,alt:p.name}):""),
+  el("h3",{text:p.name}),el("div",{class:"price",text:mad(p.price)}))));
+})();
+</script></body></html>
