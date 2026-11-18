@@ -1,0 +1,31 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Zayta Cosmétique : huile et beurre capillaires 100 % naturels. Paiement à la livraison partout au Maroc."><meta property="og:title" content="Zayta Cosmétique"><meta property="og:description" content="Huile et beurre capillaires 100 % naturels. Paiement à la livraison."><meta property="og:image" content="assets/duo.jpg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"><title>Zayta Cosmétique</title></head><body>
+<header><div class="wrap"><a class="logo" href="index.html">Zayta<small>Cosmétique</small></a></div></header>
+<main class="wrap">
+<section class="hero"><div><h1>Des cheveux nourris, naturellement.</h1><p>Huile et beurre capillaires 100 % naturels. Paiement à la livraison partout au Maroc.</p><a class="btn" href="#produits">Voir les produits</a></div><div class="stage" id="stage"><img src="assets/duo.jpg" width="1024" height="1024" fetchpriority="high" alt="Huile capillaire nourrissante et beurre capillaire fouetté Zayta"></div></section>
+<section id="produits"><h2>Nos produits</h2><div class="grid" id="grid" aria-live="polite"><p>Chargement…</p></div></section>
+</main>
+<footer><div class="wrap">Zayta Cosmétique · Paiement à la livraison · <a href="#" id="wa-foot">WhatsApp 07 04 85 47 00</a></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="app.js"></script>
+<script>
+track("visit");
+addWhatsApp("Bonjour Zayta, j'ai une question sur vos produits.");
+$("#wa-foot").href = waLink("Bonjour Zayta, j'ai une question sur vos produits."); $("#wa-foot").target = "_blank";
+tilt($("#stage"), 9);
+const g = $("#grid");
+function draw(list) {
+  g.replaceChildren();
+  list.forEach((p, i) => {
+    const ph = el("div", {class:"ph"}, p.image_url ? el("img", {src:p.image_url, alt:p.name, width:"800", height:"800", loading:i > 1 ? "lazy" : "eager"}) : "");
+    const card = el("a", {class:"card", href:"product.html?id=" + p.id}, ph, el("h3", {text:p.name}), el("div", {class:"price", text:mad(p.price)}));
+    g.append(card); tilt(ph, 10);
+  });
+}
+let cached = null; try { cached = JSON.parse(sessionStorage.getItem("zp")); } catch {}
+if (cached && cached.length) draw(cached);
+(async () => {
+  const {data, error} = await sb.from("products").select("*").eq("active", true).order("created_at");
+  if (error || !data || !data.length) { if (!cached) { g.replaceChildren(el("p", {text: error ? "Impossible de charger les produits pour le moment." : "Les produits arrivent bientôt."})); } return; }
+  try { sessionStorage.setItem("zp", JSON.stringify(data)); } catch {}
+  draw(data);
+})();
+</script></body></html>
