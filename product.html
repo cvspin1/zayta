@@ -1,0 +1,56 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"><title>Zayta Cosmétique</title></head><body>
+<header><div class="wrap"><a class="logo" href="index.html">Zayta<small>Cosmétique</small></a></div></header>
+<main class="wrap"><div id="box" class="product"><p>Chargement…</p></div></main>
+<footer><div class="wrap"><a href="index.html">Retour aux produits</a></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="app.js"></script>
+<script>
+function audioBox(p){
+ if(!p.audio_url) return el("p",{text:p.description||""});
+ const au=new Audio(p.audio_url); au.preload="metadata";
+ const PLAY='<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>', PAUSE='<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+ const b=el("button",{class:"play",type:"button","aria-label":"Écouter la présentation du produit"}); b.innerHTML=PLAY;
+ const lab=el("span",{class:"lab",text:"Écouter la présentation"}), bar=el("i"), track=el("span",{class:"bar"},bar);
+ b.onclick=()=>au.paused?au.play():au.pause();
+ au.onplay=()=>{b.innerHTML=PAUSE;lab.textContent="Pause"};
+ au.onpause=()=>{b.innerHTML=PLAY;lab.textContent=au.currentTime?"Reprendre":"Écouter la présentation"};
+ au.ontimeupdate=()=>{bar.style.width=(au.duration?au.currentTime/au.duration*100:0)+"%"};
+ au.onended=()=>{b.innerHTML=PLAY;lab.textContent="Réécouter";bar.style.width="0"};
+ // lecture automatique à l'ouverture. Si le navigateur la bloque, elle démarre au premier toucher.
+ const EV=["pointerup","keydown","click"];
+ const unlock=ev=>{ if(b.contains(ev.target)) return; au.play().catch(()=>{}); };
+ const stopWaiting=()=>EV.forEach(e=>removeEventListener(e,unlock,true));
+ au.addEventListener("play",stopWaiting);
+ au.play().catch(()=>{
+  lab.textContent="Touchez pour écouter"; b.classList.add("pulse");
+  EV.forEach(e=>addEventListener(e,unlock,true));
+ });
+ document.addEventListener("visibilitychange",()=>{ if(document.hidden) au.pause(); });
+ addEventListener("pagehide",()=>au.pause());
+ return el("div",{class:"player"},b,el("div",{class:"pl"},lab,track));
+}
+(async()=>{
+ const id=new URLSearchParams(location.search).get("id"), box=$("#box");
+ const {data:p}=await sb.from("products").select("*").eq("id",id).eq("active",true).maybeSingle();
+ box.replaceChildren();
+ if(!p){box.append(el("p",{text:"Produit introuvable."}));return}
+ document.title=p.name+" · Zayta Cosmétique";
+ const f=el("form",{class:"order",id:"order"});
+ f.innerHTML='<h2 style="font-size:32px;margin:0">Commander</h2>'
+  +'<label>Nom complet<input name="customer_name" required autocomplete="name"></label>'
+  +'<label>Téléphone<input name="phone" required inputmode="tel" autocomplete="tel" pattern="0[5-7][0-9]{8}" placeholder="0612345678"></label>'
+  +'<label>Ville<input name="city" required autocomplete="address-level2"></label>'
+  +'<label>Adresse de livraison<textarea name="address" required rows="2"></textarea></label>'
+  +'<label>Quantité<input name="quantity" type="number" min="1" max="20" value="1" required></label>'
+  +'<input class="hp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">'
+  +'<button class="btn" type="submit">Commander · paiement à la livraison</button>'
+  +'<p class="note">Vous payez en espèces à la réception. Nous vous appelons pour confirmer.</p><div id="out" role="status"></div>';
+ f.onsubmit=async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(f)),out=$("#out"),b=f.querySelector("button");
+  if(d.site)return; b.disabled=true;
+  const {error}=await sb.from("orders").insert({product_id:p.id,customer_name:d.customer_name.trim(),phone:d.phone,city:d.city.trim(),address:d.address.trim(),quantity:+d.quantity});
+  if(error){b.disabled=false;out.className="msg err";out.textContent="La commande n'a pas été envoyée. Vérifiez vos informations et réessayez.";return}
+  f.replaceChildren(el("div",{class:"msg",text:"Merci ! Votre commande est enregistrée. Nous vous appelons très vite pour la confirmer."}));};
+ box.append(el("div",{class:"ph"},el("img",{src:imgFor(p),alt:p.name})),
+  el("div",{},el("h1",{text:p.name}),el("div",{class:"price",text:mad(p.price)}),audioBox(p),f));
+ document.body.append(el("a",{class:"sticky",href:"#order"},el("span",{text:"Commander"}),el("b",{text:mad(p.price)})));
+})();
+</script></body></html>

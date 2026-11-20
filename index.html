@@ -1,0 +1,28 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#EDE6DA"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"><title>Zayta Cosmétique</title></head><body>
+<header><div class="wrap"><a class="logo" href="index.html">Zayta<small>Cosmétique</small></a><a class="btn sm ghost" href="#produits">Produits</a></div></header>
+<main>
+<div class="wrap"><section class="hero">
+ <div><h1 class="split">Des cheveux nourris, naturellement.</h1><p>Huile et beurre capillaires 100 % naturels. Paiement à la livraison partout au Maroc.</p><a class="btn" href="#produits">Voir les produits</a></div>
+ <div class="stage"><div class="arch"><div class="scene"><div class="shadow"></div><img class="bottle" src="assets/bottle.webp" alt="Huile capillaire nourrissante Zayta, 100 ml"><img class="jar" src="assets/jar.webp" alt="Beurre capillaire fouetté Zayta, 150 g"></div><div class="badge" aria-hidden="true"><svg viewBox="0 0 200 200"><defs><path id="c" d="M100,100 m-82,0 a82,82 0 1,1 164,0 a82,82 0 1,1 -164,0"/></defs><text><textPath href="#c">100 % naturel · paiement à la livraison · </textPath></text></svg><b>Z</b></div></div></div>
+</section></div>
+<div class="band" aria-hidden="true"><div>
+ <span>Huile nourrissante<i></i>Beurre fouetté<i></i>100 % naturel<i></i>Livraison partout au Maroc<i></i></span>
+ <span>Huile nourrissante<i></i>Beurre fouetté<i></i>100 % naturel<i></i>Livraison partout au Maroc<i></i></span>
+ <span>Huile nourrissante<i></i>Beurre fouetté<i></i>100 % naturel<i></i>Livraison partout au Maroc<i></i></span>
+ <span>Huile nourrissante<i></i>Beurre fouetté<i></i>100 % naturel<i></i>Livraison partout au Maroc<i></i></span>
+</div></div>
+<div class="wrap"><section class="prods" id="produits"><h2>Nos produits</h2><div class="grid" id="grid" aria-live="polite"><p>Chargement…</p></div></section></div>
+</main>
+<footer><div class="wrap">Zayta Cosmétique · Paiement à la livraison</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="app.js"></script>
+<script>
+document.querySelectorAll(".split").forEach(h=>{const w=h.textContent.trim().split(" ");h.setAttribute("aria-label",h.textContent.trim());h.replaceChildren(...w.flatMap((t,i)=>[Object.assign(el("span",{style:"--i:"+i,"aria-hidden":"true"}),{textContent:t}),document.createTextNode(" ")]))});
+(async()=>{
+ const g=$("#grid"); const {data,error}=await sb.from("products").select("*").eq("active",true).order("created_at");
+ g.replaceChildren();
+ if(error||!data.length){g.append(el("p",{text:error?"Impossible de charger les produits pour le moment.":"Les produits arrivent bientôt."}));return}
+ data.forEach(p=>g.append(el("a",{class:"card",href:"product.html?id="+p.id},
+  el("div",{class:"ph"},el("img",{src:imgFor(p),alt:p.name,loading:"lazy"}),el("span",{class:"go",text:"Commander"})),
+  el("h3",{text:p.name}),el("div",{class:"price",text:mad(p.price)}))));
+})();
+</script></body></html>
