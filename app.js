@@ -8,4 +8,4 @@ function el(tag, attrs = {}, ...kids) {
   return e;
 }
 // Photo du produit : celle du dashboard, sinon une photo par défaut selon le nom
-const imgFor = p => p.image_url || (/huile/i.test(p.name) ? "assets/bottle.webp" : /beurre/i.test(p.name) ? "assets/jar.webp" : "assets/duo.jpg");
+const imgFor = p => p.image_url || (/pack|duo|coffret/i.test(p.name) ? "assets/pack.webp" : /huile/i.test(p.name) ? "assets/bottle.webp" : /beurre/i.test(p.name) ? "assets/jar.webp" : "assets/duo.jpg");
